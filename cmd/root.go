@@ -3,18 +3,43 @@ package cmd
 import (
   "fmt"
   "github.com/spf13/cobra"
+  "io"
   "os"
 )
 
+func check(e error) {
+  if e != nil {
+    panic(e)
+  }
+}
+
+const (
+  BufferSize = 4
+)
+
 var rootCmd = &cobra.Command{
-  Use:   "hugo",
-  Short: "Hugo is a very fast static site generator",
-  Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at http://hugo.spf13.com`,
+  Use:   "cat",
+  Short: "gocat is cat",
+  Long: `gocat is cat`,
+  Args: cobra.MinimumNArgs(1),
   Run: func(cmd *cobra.Command, args []string) {
     // Do Stuff Here
-    fmt.Println("I am inside the command")
+    file, err := os.Open(args[0])
+    check(err)
+    n := 5
+    buffer := make([]byte, BufferSize) // 5 bytes buffer
+    for n > 0  {
+      n, err = file.Read(buffer)
+      if err != nil {
+        if err == io.EOF {
+          break
+        }
+      }
+      _, err := os.Stdout.Write(buffer[:n])
+      check(err)
+    }
+    err = file.Close()
+    check(err)
   },
 }
 

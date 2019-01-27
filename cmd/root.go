@@ -18,6 +18,23 @@ const (
 	BufferSize = 4
 )
 
+func catFile(filename string) {
+	file, err := os.Open(filename)
+	check(err)
+	buffer := make([]byte, BufferSize)
+	n := 1
+	for n > 0 {
+		n, err = file.Read(buffer)
+		if  err != nil && err == io.EOF {
+			break
+		}
+		_, err := os.Stdout.Write(buffer[:n])
+		check(err)
+	}
+	err = file.Close()
+	check(err)
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "cat",
 	Short: "gocat is cat",
@@ -25,20 +42,9 @@ var rootCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
-		file, err := os.Open(args[0])
-		check(err)
-		buffer := make([]byte, BufferSize)
-		n := 1
-		for n > 0 {
-			n, err = file.Read(buffer)
-			if  err != nil && err == io.EOF {
-				break
-			}
-			_, err := os.Stdout.Write(buffer[:n])
-			check(err)
+		for i:= 0; i < len(args); i++ {
+			catFile(args[i])
 		}
-		err = file.Close()
-		check(err)
 	},
 }
 

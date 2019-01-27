@@ -7,6 +7,12 @@ import (
 	"os"
 )
 
+var noBuffer bool
+
+func init() {
+	rootCmd.PersistentFlags().BoolVarP(&noBuffer, "nobuffer", "u", false, "Disable output buffering.")
+}
+
 func check(e error) {
 	if e != nil {
 		fmt.Println("gocat:", e)
@@ -14,24 +20,14 @@ func check(e error) {
 	}
 }
 
-const (
-	BufferSize = 4
-)
-
 func catFile(filename string) {
 	file, err := os.Open(filename)
 	check(err)
-	buffer := make([]byte, BufferSize)
-	n := 1
-	for n > 0 {
-		n, err = file.Read(buffer)
-		if  err != nil && err == io.EOF {
-			break
-		}
-		_, err := os.Stdout.Write(buffer[:n])
-		check(err)
+	buffer := make([]byte, 1)
+	if !noBuffer {
+		buffer = nil
 	}
-	err = file.Close()
+	_, err = io.CopyBuffer(os.Stdout, file, buffer)
 	check(err)
 }
 
@@ -39,9 +35,8 @@ var rootCmd = &cobra.Command{
 	Use:   "cat",
 	Short: "gocat is cat",
 	Long:  `gocat is cat`,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
 		for i:= 0; i < len(args); i++ {
 			catFile(args[i])
 		}

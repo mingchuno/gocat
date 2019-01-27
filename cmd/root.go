@@ -31,10 +31,8 @@ var rootCmd = &cobra.Command{
 		n := 1
 		for n > 0 {
 			n, err = file.Read(buffer)
-			if err != nil {
-				if err == io.EOF {
-					break
-				}
+			if  err != nil && err == io.EOF {
+				break
 			}
 			_, err := os.Stdout.Write(buffer[:n])
 			check(err)

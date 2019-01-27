@@ -23,11 +23,18 @@ func check(e error) {
 func catFile(filename string) {
 	file, err := os.Open(filename)
 	check(err)
+	catFileInternal(file)
+	err = file.Close()
+	check(err)
+}
+
+func catFileInternal(reader io.Reader) {
 	buffer := make([]byte, 1)
 	if !noBuffer {
+		// let internal choose buffer size
 		buffer = nil
 	}
-	_, err = io.CopyBuffer(os.Stdout, file, buffer)
+	_, err := io.CopyBuffer(os.Stdout, reader, buffer)
 	check(err)
 }
 
@@ -37,8 +44,12 @@ var rootCmd = &cobra.Command{
 	Long:  `gocat is cat`,
 	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		for i:= 0; i < len(args); i++ {
-			catFile(args[i])
+		if len(args) == 0 {
+			catFileInternal(os.Stdin)
+		} else {
+			for i:= 0; i < len(args); i++ {
+				catFile(args[i])
+			}
 		}
 	},
 }

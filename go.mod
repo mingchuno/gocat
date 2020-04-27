@@ -1,3 +1,5 @@
 module gocat
 
-require github.com/spf13/cobra v0.0.5
+go 1.14
+
+require github.com/spf13/cobra v1.0.0
